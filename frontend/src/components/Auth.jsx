@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
   const [isDoctor, setIsDoctor] = useState(true);
   const [isSignIn, setIsSignIn] = useState(true);
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!isSignIn) {
+      if (isDoctor) {
+        navigate('/doctor-dashboard');
+      } else {
+        navigate('/client-dashboard');
+      }
+    }
+    // We will add sign-in logic later
+  };
 
   return (
-<div className="auth-card">
+    <div className="auth-card">
       <h1>{isDoctor ? 'Doctor' : 'Client'} Authentication</h1>
       <div className="role-selector">
         <button onClick={() => setIsDoctor(true)} className={isDoctor ? 'active' : ''}>Doctor</button>
@@ -14,7 +28,7 @@ const Auth = () => {
 
       <h2>{isSignIn ? 'Sign In' : 'Sign Up'}</h2>
 
-      <form className="auth-form">
+      <form className="auth-form" onSubmit={handleSubmit}>
         {!isSignIn && (
           <>
             <input type="text" placeholder="Full Name" />
