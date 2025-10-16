@@ -1,0 +1,4 @@
+{
+  "mongoURI": "mongodb://localhost:27017/clinix-sphere",
+  "jwtSecret": "your_jwt_secret"
+}

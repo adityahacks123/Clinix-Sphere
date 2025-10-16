@@ -1,14 +1,19 @@
-const http = require('http');
+const express = require('express');
+const connectDB = require('./config/db');
 
-const hostname = '127.0.0.1';
-const port = 3001;
+const app = express();
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World');
-});
+// Connect Database
+connectDB();
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
+const PORT = process.env.PORT || 3001;
+
+// Init Middleware
+app.use(express.json({ extended: false }));
+
+app.get('/', (req, res) => res.send('API Running'));
+
+// Define Routes
+app.use('/api/auth', require('./routes/auth'));
+
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
