@@ -3,23 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Auth = () => {
-  const [isDoctor, setIsDoctor] = useState(true);
   const [isSignIn, setIsSignIn] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
+    role: 'doctor', // Default role
   });
   const navigate = useNavigate();
 
-  const { name, email, password } = formData;
+  const { name, email, password, role } = formData;
 
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  const setRole = (newRole) => {
+    setFormData({ ...formData, role: newRole });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const role = isDoctor ? 'doctor' : 'client';
 
     if (isSignIn) {
       try {
@@ -50,10 +53,10 @@ const Auth = () => {
 
   return (
     <div className="auth-card">
-      <h1>{isDoctor ? 'Doctor' : 'Client'} Authentication</h1>
+      <h1>{role === 'doctor' ? 'Doctor' : 'Client'} Authentication</h1>
       <div className="role-selector">
-        <button onClick={() => setIsDoctor(true)} className={isDoctor ? 'active' : ''}>Doctor</button>
-        <button onClick={() => setIsDoctor(false)} className={!isDoctor ? 'active' : ''}>Client</button>
+        <button onClick={() => setRole('doctor')} className={role === 'doctor' ? 'active' : ''}>Doctor</button>
+        <button onClick={() => setRole('client')} className={role === 'client' ? 'active' : ''}>Client</button>
       </div>
 
       <h2>{isSignIn ? 'Sign In' : 'Sign Up'}</h2>
