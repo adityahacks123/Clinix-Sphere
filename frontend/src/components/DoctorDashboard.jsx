@@ -18,9 +18,12 @@ const DoctorDashboard = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const token = localStorage.getItem('token');
+      console.log('Token from localStorage:', token ? 'Token exists' : 'No token found');
+      
       const config = {
         headers: {
-          'x-auth-token': localStorage.getItem('token'),
+          'x-auth-token': token,
         },
       };
       try {
@@ -28,10 +31,17 @@ const DoctorDashboard = () => {
           axios.get('/api/auth/me', config),
           axios.get('/api/appointments', config)
         ]);
+        console.log('User data:', userRes.data);
+        console.log('Appointments:', aptRes.data);
         setAppointments(aptRes.data);
         socket.emit('join_room', userRes.data._id);
       } catch (err) {
-        console.error(err.response ? err.response.data : err.message);
+        console.error('Error fetching data:', err);
+        console.error('Error response:', err.response ? err.response.data : err.message);
+        if (err.response?.status === 401) {
+          alert('Your session has expired. Please log in again.');
+          navigate('/');
+        }
       }
     };
 
@@ -47,17 +57,23 @@ const DoctorDashboard = () => {
   }, []);
 
   const handleMarkAsCompleted = async (id) => {
+    console.log('Marking appointment as completed:', id);
     const config = {
       headers: {
+        'Content-Type': 'application/json',
         'x-auth-token': localStorage.getItem('token'),
       },
     };
     try {
       const res = await axios.put(`/api/appointments/${id}`, { status: 'Completed' }, config);
+      console.log('Updated appointment:', res.data);
       setAppointments(appointments.map(apt => apt._id === id ? res.data : apt));
       setSelectedAppointment(id);
+      alert('Appointment marked as completed! You can now create a prescription.');
     } catch (err) {
-      console.error(err.response.data);
+      console.error('Error marking as completed:', err);
+      console.error('Error response:', err.response?.data);
+      alert('Failed to mark appointment as completed. Check console for details.');
     }
   };
 
@@ -71,6 +87,7 @@ const DoctorDashboard = () => {
 
   const handlePrescriptionSubmit = async (e, appointmentId) => {
     e.preventDefault();
+    console.log('Submitting prescription:', prescriptionData);
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -78,10 +95,21 @@ const DoctorDashboard = () => {
       },
     };
     try {
-      await axios.post('/api/prescriptions', { ...prescriptionData, appointmentId }, config);
+      const res = await axios.post('/api/prescriptions', { ...prescriptionData, appointmentId }, config);
+      console.log('Prescription created:', res.data);
+      alert('Prescription created successfully!');
       setSelectedAppointment(null); // Hide form on success
+      // Reset prescription form
+      setPrescriptionData({
+        symptoms: '',
+        diagnosis: '',
+        medicines: [{ name: '', dosage: '', duration: '' }],
+        notes: '',
+      });
     } catch (err) {
-      console.error(err.response.data);
+      console.error('Error creating prescription:', err);
+      console.error('Error response:', err.response?.data);
+      alert('Failed to create prescription. Check console for details.');
     }
   };
 
